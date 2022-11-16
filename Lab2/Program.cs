@@ -1,4 +1,6 @@
-﻿namespace Lab2;
+﻿using System.Data.SqlTypes;
+
+namespace Lab2;
 public class Program
 {
     public static void Main(string[] args)
@@ -12,10 +14,10 @@ public class Program
         Stack<char> stack = new Stack<char>();
 
         // iterate over all chars in string
-        foreach(var c in s)
+        foreach (var c in s)
         {
             // if char is an open thing, push it
-            if ( c=='<' || c=='(' || c == '{' || c == '[')
+            if (c == '<' || c == '(' || c == '{' || c == '[')
             {
                 stack.Push(c);
             }
@@ -29,9 +31,23 @@ public class Program
                 // handle result == false
 
                 // if they match, pop()
-                if (Matches(c, top) ) 
+                if (Matches(c, top))
                 {
+                    //looking for top in an empty stack will cause an error
+                    //make a conditional pertaining to this issue
+                    if (stack.Count == 0)
+                    {
+                        return false;
+                    }
+
                     stack.Pop();
+                }
+
+                //There was a missing condition, so condition for Matches being false is made
+
+                if (Matches(c, top) == false)
+                {
+                    return false;
                 }
                 // else, return false
                 else
@@ -39,11 +55,11 @@ public class Program
                     return false;
                 }
             }
-            
+
         }
 
         // if stack is empty, return true
-        if( stack.Count ==0)
+        if (stack.Count == 0)
         {
             return true;
         }
@@ -54,26 +70,105 @@ public class Program
 
     private static bool Matches(char closing, char opening)
     {
-        throw new NotImplementedException();
+        if (closing == '}')
+        {
+            opening = '{';
+            return true;
+        }
+
+        else if (closing == ')')
+        {
+            opening = '(';
+            return true;
+        }
+
+        else if (closing == '>')
+        {
+            opening = '<';
+            return true;
+        }
+
+        else if (closing == ']')
+        {
+            closing = '[';
+            return true;
+        }
+
+        return false;
     }
 
 
     public static double? Evaluate(string s)
     {
+        Stack<string> stack = new Stack<string>();
+
         // parse string into tokens
         string[] tokens = s.Split();
 
         // foreach token
-        // if it's a number, push to stack
+        foreach (var t in tokens)
+        {
+            // if it's a number, push to stack
+            double n;
+            if (double.TryParse(t, out n) == true)
+            {
+                stack.Push(t);
+            }
 
-        // if it's a math operator, pop twice;
-        // compute result;
-        // push result onto stack
+            // if it's a math operator, pop twice;
+            else if (t == "-" || t == "+" || t == "*" || t == "/")
+            {
+                string firstNumber = stack.Pop();
+                string secondNumber = stack.Pop();
+
+                // compute result
+                if (t == "-")
+                {
+                    double result = double.Parse(secondNumber) - double.Parse(firstNumber);
+                    string stringResult = result.ToString();
+
+                    // push result onto stack
+                    stack.Push(stringResult);
+                }
+
+                if (t == "+")
+                {
+                    double result = double.Parse(secondNumber) + double.Parse(firstNumber);
+                    string stringResult = result.ToString();
+
+                    // push result onto stack
+                    stack.Push(stringResult);
+                }
+
+                if (t == "*")
+                {
+                    double result = double.Parse(secondNumber) * double.Parse(firstNumber);
+                    string stringResult = result.ToString();
+
+                    // push result onto stack
+                    stack.Push(stringResult);
+                }
+
+                if (t == "/")
+                {
+                    double result = double.Parse(secondNumber) / double.Parse(firstNumber);
+                    string stringResult = result.ToString();
+
+                    // push result onto stack
+                    stack.Push(stringResult);
+                }
+            }
+        }
 
         // return top of stack (if the stack has 1 element)
+        if (stack.Count == 1)
+        {
+            string answer = stack.Peek();
+            double intAnswer = double.Parse(answer);
+            return intAnswer;
+        }
 
         return null;
     }
 
 }
-
